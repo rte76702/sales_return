@@ -7,4 +7,12 @@ import frappe
 from frappe.model.document import Document
 
 class SalesReturns(Document):
-	pass
+	
+	def get_items(self):
+		pass
+
+	def submit_invoices(self):
+		pass
+
+	def add_remove_items(self):
+		pass

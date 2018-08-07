@@ -89,7 +89,8 @@ app_license = "MIT"
 doc_events = {
 	'Sales Invoice': {
 		'validate': 'sales_return.utils.prevent_submission',
-		'on_submit': 'sales_return.utils.prevent_submission'
+		'on_submit': 'sales_return.utils.prevent_submission',
+		'on_trash': 'sales_return.utils.prevent_delete'
 	}
 }
 # Scheduled Tasks
