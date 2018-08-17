@@ -1,13 +1,21 @@
 // Copyright (c) 2018, rte76702 and contributors
 // For license information, please see license.txt
 
+$form_section = $('[data-fieldname="invoice_items"]').closest('.form-section');
+$form_section.find('.section-body').appendTo($('[data-fieldname="remove_items"]').closest('.section-body'));
+$form_section.remove();
+
+
 var iter_rows = function(frm, rows){
 	if (rows) {
 		frm.doc.invoice_items = [];
+		var total = 0
 		rows.forEach((row)=>{
 			frm.add_child('invoice_items', row)
+			total += row.amount
 		})
 		frm.set_value('items_found', 1);
+		frm.set_value('total_amount', total)
 		frm.refresh_fields();
 	} else {
 		frm.doc.invoice_items = [];
@@ -22,16 +30,22 @@ frappe.ui.form.on('Sales Returns', {
 		frm.disable_save()
 	},
 
-	submit_invoices: async function(frm){
-		await frappe.call({
-			method: 'submit_invoices',
-			doc: frm.doc,
-			freeze: true
-		})
-		frm.doc.invoice_items = [];
-		frm.set_value('items_found', 0);
-		frm.refresh_fields();
-		frappe.msgprint('Invoices Submitted');
+	submit_invoices: function(frm){
+		frappe.confirm("Submit Invoices?", 	function(frm){
+				frappe.call({
+					method: 'submit_invoices',
+					doc: cur_frm.doc,
+					freeze: true,
+					callback: function(r){
+						cur_frm.doc.invoice_items = [];
+						cur_frm.set_value('items_found', 0);
+						cur_frm.set_value('total_amount', 0);
+						cur_frm.refresh_fields();
+						frappe.msgprint('Invoices Submitted');
+					}
+				})
+			}
+		)
 	},
 
 	render_items: function(frm) {
@@ -66,7 +80,7 @@ frappe.ui.form.on('Sales Returns', {
 					freeze: true,
 					callback: function(r){
 						iter_rows(frm, r.message);
-						frappe.msgprint('Items Updated')
+						frappe.show_alert('Items Updated', 2)
 					}
 				});
 			}, 'Add/Remove Items','Submit'

@@ -9,7 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
- "editable_grid": 1, 
+ "editable_grid": 0, 
  "engine": "InnoDB", 
  "fields": [
   {
@@ -175,7 +175,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-08-08 10:08:52.489030", 
+ "modified": "2018-08-16 23:49:15.729742", 
  "modified_by": "Administrator", 
  "module": "Sales Return", 
  "name": "Return Invoice Item", 
