@@ -12,9 +12,13 @@ def prevent_submission(doc, method):
 		if doc.customer in [i.customer for i in settings.waiters_table]:
 			frappe.db.set_default("hooked_%s_%s"%(doc.customer, doc.name), 1)
 			doc.docstatus = 0
+			for d in doc.get_all_children():
+				d.docstatus = doc.docstatus
 	else:
 		if cint(frappe.db.get_default("hooked_%s_%s"%(doc.customer, doc.name))) == 1:
 			doc.docstatus = 0
+			for d in doc.get_all_children():
+				d.docstatus = doc.docstatus
 
 def prevent_delete(doc, method):
 	if not cint(frappe.db.get_single_value('Returns Settings', 'enabled')):
