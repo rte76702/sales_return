@@ -14,17 +14,26 @@ class SalesReturns(Document):
 		sinvs = frappe.get_all('Sales Invoice',filters={'docstatus':0, 'customer':self.waiter})
 		sinvs = [frappe.get_doc('Sales Invoice', i) for i in sinvs if \
 					cint(frappe.db.get_default("hooked_%s_%s"%(self.waiter, i.name)))]
+		
 		resp = []
+		total = 0
+		self.set('invoice_items', [])
+		self.set('items_found', 0)
 		for inv in sinvs:
 			for item in inv.items:
-				resp.append({
+				self.append('invoice_items', {
 					'sales_invoice':inv.name,
 					'item_code':item.item_code,
 					'qty':item.qty,
 					'amount':item.net_amount,
 					'rate': item.rate
 				})
-		return resp
+				total += item.net_amount
+		self.total_amount = total
+		if self.invoice_items:
+			self.items_found = 1
+		else:
+			frappe.msgprint('No pending Sales Invoices')
 
 	def submit_invoices(self):
 		invoices = list(set([i.sales_invoice for i in self.invoice_items]))
@@ -36,10 +45,11 @@ class SalesReturns(Document):
 					frappe.throw('Item %s in original invoice not found in reconciled invoice'%item.item_code)
 				item.qty = item_qtys[item.item_code]
 			inv._action = ''
-			inv.validate()
 			if inv.payments:
 				inv.payments[0].amount = inv.grand_total
-			inv.validate()
+			else:
+				payment = inv.append('payments', {})
+				payment.update({'mode_of_payment':"Cash"})
 			inv.write_off_amount = 0
 			inv.validate()
 			frappe.db.set_default("hooked_%s_%s"%(self.waiter, invoice), 0)
@@ -63,4 +73,4 @@ class SalesReturns(Document):
 					row.qty = 0
 					row.amount = 0
 		if quantity: frappe.msgprint('Quantity specified is greater than that found in invoices')
-		return [i.as_dict() for i in self.invoice_items]
+		self.total_amount = sum([i.amount for i in self.invoice_items])

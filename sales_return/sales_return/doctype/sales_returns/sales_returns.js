@@ -6,25 +6,6 @@ $form_section.find('.section-body').appendTo($('[data-fieldname="remove_items"]'
 $form_section.remove();
 
 
-var iter_rows = function(frm, rows){
-	if (rows) {
-		frm.doc.invoice_items = [];
-		var total = 0
-		rows.forEach((row)=>{
-			frm.add_child('invoice_items', row)
-			total += row.amount
-		})
-		frm.set_value('items_found', 1);
-		frm.set_value('total_amount', total)
-		frm.refresh_fields();
-	} else {
-		frm.doc.invoice_items = [];
-		frm.set_value('items_found', 0);
-		frm.refresh_fields();
-		frappe.msgprint('No pending Sales Invoices')
-	}
-};
-
 frappe.ui.form.on('Sales Returns', {
 	refresh: function(frm) {
 		frm.disable_save()
@@ -54,7 +35,7 @@ frappe.ui.form.on('Sales Returns', {
 			doc: frm.doc,
 			freeze:true,
 			callback: function(r){
-				iter_rows(frm, r.message);
+				cur_frm.refresh_fields()
 			}
 		});
 	},
@@ -79,7 +60,7 @@ frappe.ui.form.on('Sales Returns', {
 					args: values,
 					freeze: true,
 					callback: function(r){
-						iter_rows(frm, r.message);
+						cur_frm.refresh_fields()
 						frappe.show_alert('Items Updated', 2)
 					}
 				});
